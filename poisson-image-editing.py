@@ -34,6 +34,13 @@ def get_neighbors(index):
     return neighbors
 
 
+def laplacian(src, index):
+    i, j = index
+    value = 4 * src[i, j] - src[i - 1, j] \
+        - src[i + 1, j] - src[i, j - 1] - src[i, j + 1]
+    return value
+
+
 def poisson_sparse_matrix(indicies):
     # N = Number of points in mask
     N = len(indicies)
@@ -63,9 +70,8 @@ def poisson_blending(source, target, mask):
     b = np.zeros(N)
     for i, index in enumerate(indicies):
         # Pixels inside Omega region
-        b[i] = 4 * source[index[0], index[1]] - source[index[0] - 1, index[1]] \
-               - source[index[0] + 1, index[1]] - source[index[0], index[1] - 1] \
-               - source[index[0], index[1] + 1]
+        # TODO: Compare the gradient of source and target on index to choose laplacian src
+        b[i] = laplacian(source, index)
         # Pixels on the boundary
         if mask[index] == 1 and bool_pixel_on_boundary(index, mask):
             for pixel in get_neighbors(index):
